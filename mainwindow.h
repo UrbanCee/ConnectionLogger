@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QTime>
 
 QT_FORWARD_DECLARE_CLASS(QProcess)
 QT_FORWARD_DECLARE_CLASS(QTimer)
@@ -26,6 +27,7 @@ private:
     QProcess *pingProcess;
     QTimer *pingTimer;
     QTimer *pingTimeOutWarning;
+    QTime timePingStarted;
 };
 
 #endif // MAINWINDOW_H

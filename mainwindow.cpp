@@ -34,6 +34,7 @@ void MainWindow::ping()
     QStringList args{"-c" ,  "1" ,"8.8.8.8"};
     pingProcess->start(command, args);
     pingTimer->stop();
+    timePingStarted.start();
 }
 
 void MainWindow::pingTakingLong()
@@ -43,6 +44,7 @@ void MainWindow::pingTakingLong()
 
 void MainWindow::pingFinished()
 {
+    int iInternalPing = timePingStarted.elapsed();
     QString returnString=pingProcess->readAll();
     QString errorString;
     switch(pingProcess->exitCode())
@@ -58,8 +60,7 @@ void MainWindow::pingFinished()
     default:
         break;
     }
-    ui->textEditPing->append(returnString);
-    QRegularExpression re("time=(?<time>\\d+\\.\\d+)\\sms");
+    QRegularExpression re("time=(?<time>\\d+\\.*\\d*)\\sms");
     QRegularExpressionMatch match = re.match(returnString);
     if (!match.hasMatch())
     {
@@ -69,11 +70,26 @@ void MainWindow::pingFinished()
     {
         int pingTime=static_cast<int> (match.captured("time").toDouble());
         ui->labelStatus->setText(QString("Last Ping: %1 ms").arg(pingTime));
+        ui->labelStatus->setStyleSheet("QLabel {color  : green }");
+        if (pingTime>ui->spinBoxHighPing->value())
+            ui->textEditLog->append(QString("%1 %2")
+                                    .arg(QString("[%1]:").arg(QDateTime::currentDateTime().toString()))
+                                    .arg(QString("High Ping: %1").arg(pingTime)));
+        if (qAbs(iInternalPing-pingTime)/static_cast<double>(pingTime)>0.8)
+            ui->textEditLog->append(QString("%1 %2")
+                                    .arg(QString("[%1]:").arg(QDateTime::currentDateTime().toString()))
+                                    .arg(QString("Timing mismatch: ping result: %1ms   internal: %2ms").arg(pingTime).arg(iInternalPing)));
+
     }
     else{
+        errorString.append(QString(" (duration: %1ms").arg(iInternalPing));
+        ui->labelStatus->setStyleSheet("QLabel {color  : yellow }");
         ui->textEditLog->append(QString("%1 %2")
                                 .arg(QString("[%1]:").arg(QDateTime::currentDateTime().toString()))
                                 .arg(errorString));
+        ui->textEditPing->append(QString("%1 %2")
+                                 .arg(QString("[%1]:").arg(QDateTime::currentDateTime().toString()))
+                                 .arg(returnString));
     }
     pingTimer->setInterval(ui->spinBoxPingDelay->value());
     pingTimer->start();
