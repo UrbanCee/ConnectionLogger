@@ -21,6 +21,7 @@ public:
 private slots:
     void pingFinished();
     void pingTakingLong();
+    void pingStarted();
     void ping();
 private:
     Ui::MainWindow *ui;

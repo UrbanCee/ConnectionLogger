@@ -14,10 +14,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     pingProcess = new QProcess(this);
     connect(pingProcess,SIGNAL(finished(int,QProcess::ExitStatus)),this,SLOT(pingFinished()));
+    connect(pingProcess,SIGNAL(started()),this,SLOT(pingStarted()));
     pingTimer = new QTimer(this);
     pingTimeOutWarning = new QTimer(this);
 
     connect(pingTimer,SIGNAL(timeout()),this,SLOT(ping()));
+    connect(pingTimeOutWarning,SIGNAL(timeout()),this,SLOT(pingTakingLong()));
     pingTimer->setInterval(ui->spinBoxPingDelay->value());
     pingTimeOutWarning->setInterval(1000);
     ping();
@@ -34,17 +36,24 @@ void MainWindow::ping()
     QStringList args{"-c" ,  "1" ,"8.8.8.8"};
     pingProcess->start(command, args);
     pingTimer->stop();
-    timePingStarted.start();
 }
 
 void MainWindow::pingTakingLong()
 {
+    ui->textEditLog->append(QString("%1 %2")
+                            .arg(QString("[%1]:").arg(QDateTime::currentDateTime().toString()))
+                            .arg(QString("Ping still in progress after %1ms").arg(timePingStarted.elapsed())));
+}
 
+void MainWindow::pingStarted()
+{
+    timePingStarted.start();
 }
 
 void MainWindow::pingFinished()
 {
     int iInternalPing = timePingStarted.elapsed();
+    pingTimeOutWarning->stop();
     QString returnString=pingProcess->readAll();
     QString errorString;
     switch(pingProcess->exitCode())
@@ -75,10 +84,11 @@ void MainWindow::pingFinished()
             ui->textEditLog->append(QString("%1 %2")
                                     .arg(QString("[%1]:").arg(QDateTime::currentDateTime().toString()))
                                     .arg(QString("High Ping: %1").arg(pingTime)));
-        if (qAbs(iInternalPing-pingTime)/static_cast<double>(pingTime)>0.8)
-            ui->textEditLog->append(QString("%1 %2")
-                                    .arg(QString("[%1]:").arg(QDateTime::currentDateTime().toString()))
-                                    .arg(QString("Timing mismatch: ping result: %1ms   internal: %2ms").arg(pingTime).arg(iInternalPing)));
+        if (ui->checkBoxMismatch->isChecked())
+            if (qAbs(iInternalPing-pingTime)/static_cast<double>(pingTime)*100>ui->spinBoxMismatchPercent->value())
+                ui->textEditLog->append(QString("%1 %2")
+                                        .arg(QString("[%1]:").arg(QDateTime::currentDateTime().toString()))
+                                        .arg(QString("Timing mismatch: ping result: %1ms   internal: %2ms").arg(pingTime).arg(iInternalPing)));
 
     }
     else{
