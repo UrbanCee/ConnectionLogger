@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "errorhandler.h"
 #include "ui_mainwindow.h"
 
 #include <QProcess>
@@ -9,9 +10,12 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow),pingProcess(nullptr),pingTimer(nullptr)
+    ui(new Ui::MainWindow),errorHandler(nullptr),pingProcess(nullptr),pingTimer(nullptr)
 {
     ui->setupUi(this);
+
+    errorHandler = new ErrorHandler(this);
+
     pingProcess = new QProcess(this);
     connect(pingProcess,SIGNAL(finished(int,QProcess::ExitStatus)),this,SLOT(pingFinished()));
     connect(pingProcess,SIGNAL(started()),this,SLOT(pingStarted()));

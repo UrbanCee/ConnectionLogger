@@ -26,10 +26,12 @@ CONFIG += c++11
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+    errorhandler.cpp
 
 HEADERS += \
-        mainwindow.h
+        mainwindow.h \
+    errorhandler.h
 
 FORMS += \
         mainwindow.ui

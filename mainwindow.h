@@ -6,6 +6,7 @@
 
 QT_FORWARD_DECLARE_CLASS(QProcess)
 QT_FORWARD_DECLARE_CLASS(QTimer)
+QT_FORWARD_DECLARE_CLASS(ErrorHandler)
 
 namespace Ui {
 class MainWindow;
@@ -25,6 +26,7 @@ private slots:
     void ping();
 private:
     Ui::MainWindow *ui;
+    ErrorHandler *errorHandler;
     QProcess *pingProcess;
     QTimer *pingTimer;
     QTimer *pingTimeOutWarning;
