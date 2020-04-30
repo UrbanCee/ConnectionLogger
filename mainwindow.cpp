@@ -14,7 +14,9 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    errorHandler = new ErrorHandler(this);
+    errorHandler = new ErrorHandler(ui->labelStatus,ui->textEditLog,this);
+    errorHandler->changeTimeout(ui->spinBoxTimeToNorm->value());
+    connect(ui->spinBoxTimeToNorm,SIGNAL(valueChanged(int)),errorHandler,SLOT(changeTimeout(int)));
 
     pingProcess = new QProcess(this);
     connect(pingProcess,SIGNAL(finished(int,QProcess::ExitStatus)),this,SLOT(pingFinished()));
@@ -34,6 +36,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+
 void MainWindow::ping()
 {
     QString command = "ping";
@@ -47,6 +50,7 @@ void MainWindow::pingTakingLong()
     ui->textEditLog->append(QString("%1 %2")
                             .arg(QString("[%1]:").arg(QDateTime::currentDateTime().toString()))
                             .arg(QString("Ping still in progress after %1ms").arg(timePingStarted.elapsed())));
+    //TODO response time for error handler
 }
 
 void MainWindow::pingStarted()
@@ -58,28 +62,28 @@ void MainWindow::pingFinished()
 {
     int iInternalPing = timePingStarted.elapsed();
     pingTimeOutWarning->stop();
-    QString returnString=pingProcess->readAll();
-    QString errorString;
+    PingResult result(pingProcess->readAll());
     switch(pingProcess->exitCode())
     {
     case 0: // all ok
         break;
     case 1: // no reply
-        errorString.append("Ping returned no reply! ");
+        result.addError(PingResult::PING_NO_REPLY_ERROR);
         break;
     case 2: // error
-        errorString.append("Ping returned error! ");
+        result.addError(PingResult::PING_RETURN_ERROR);
         break;
     default:
         break;
     }
-    QRegularExpression re("time=(?<time>\\d+\\.*\\d*)\\sms");
-    QRegularExpressionMatch match = re.match(returnString);
-    if (!match.hasMatch())
-    {
-        errorString.append("No time found! ");
-    }
-    if (errorString.isEmpty())
+    if (ui->checkBoxMismatch->isChecked())
+        if (qAbs(iInternalPing-result.ping)/static_cast<double>(result.ping)*100>ui->spinBoxMismatchPercent->value())
+            result.addWarning(PingResult::TIME_MISMATCH_WARNING);
+    if (result.ping>ui->spinBoxHighPing->value())
+        result.addWarning(PingResult::HIGH_PING_WARNING);
+    errorHandler->update(result);
+
+/*    if (errorString.isEmpty())
     {
         int pingTime=static_cast<int> (match.captured("time").toDouble());
         ui->labelStatus->setText(QString("Last Ping: %1 ms").arg(pingTime));
@@ -105,6 +109,7 @@ void MainWindow::pingFinished()
                                  .arg(QString("[%1]:").arg(QDateTime::currentDateTime().toString()))
                                  .arg(returnString));
     }
+    */
     pingTimer->setInterval(ui->spinBoxPingDelay->value());
     pingTimer->start();
 }

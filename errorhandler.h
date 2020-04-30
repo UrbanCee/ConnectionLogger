@@ -6,32 +6,71 @@
 
 QT_FORWARD_DECLARE_CLASS(QTimer)
 QT_FORWARD_DECLARE_CLASS(QWidget)
+QT_FORWARD_DECLARE_CLASS(QLabel)
+QT_FORWARD_DECLARE_CLASS(QTextEdit)
 
-struct Error{
+struct PingResult
+{
+    enum Errors{NO_ERROR = 0 , PING_RETURN_ERROR = 1<<0, PING_NO_REPLY_ERROR = 1<<1, NO_TIME_ERROR = 1<<2, EMPTY_OUTPUT_ERROR = 1 << 3, UNKNOWN_ERROR = 1<<16};
+    enum Warnings{NO_WARNING = 0, TIME_MISMATCH_WARNING = 1<<0, HIGH_PING_WARNING = 1<<2, RESPONSE_TIME_TOO_HIGH_WARNING = 1<<3, UNKNOWN_WARNING= 1<<16};
+    PingResult(QString output);
+    QDateTime time;
     int warnings;
     int errors;
+    int ping;
+    QString output;
+    bool hasErrors() const;
+    void addWarning(int warning){warnings|=warning;}
+    void addError(int error){errors|=error;}
+    bool containsWarning(int warning) const;
+    bool containsError(int error) const;
+    QString errorString() const;
+    QString warningString() const;
+
+    static QString errorString(int errors);
+    static QString warningString(int warnings);
+    static bool containsWarning(int warnings,Warnings warning);
+    static bool containsError(int errors,Errors error);
+};
+
+
+
+class Error{
+public:
+    Error(const PingResult &);
+    void addPing(const PingResult &);
+    void finalize();
+
+    int errors;
+    int warnings;
+    int goodPings;
     QDateTime start;
     QDateTime end;
-    QStringList outputs;
+    QList<PingResult> pings;
+
+    QString warningErrorString();
 };
+
 
 class ErrorHandler : public QObject
 {
     Q_OBJECT
 public:
-    explicit ErrorHandler(QWidget *parent = nullptr);
-
-    enum ErrorTypes {NO_ERROR = 0 , PING_NO_RETURN = 1<<0, PING_NO_REPLY = 1<<1, NO_TIME = 1<<2, UNKNOWN = 1<<16};
-    enum WarningTypes {NO_WARNING = 0, TIME_MISMATCH = 1<<0, HIGH_PING = 1<<2};
-
-    void update(int error, int warning, int pingTime, QString pingReturn);
+    explicit ErrorHandler(QLabel *labelStatus,QTextEdit *textEditLog,QWidget *parent = nullptr);
+    void update(PingResult currentPing);
 signals:
 public slots:
-    void changeTimeout(int);
+    void changeTimeout(int iNewTimeToNormal);
+private slots:
+    void returnToNormal();
 private:
     QWidget *parentWidget;
+    QLabel *labelStatus;
+    QTextEdit *textEditLog;
+    QTimer *timer;
     Error *currErr;
     QList<Error> errors;
+
 };
 
 #endif // ERRORHANDLER_H
