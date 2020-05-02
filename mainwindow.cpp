@@ -10,13 +10,11 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow),errorHandler(nullptr),pingProcess(nullptr),pingTimer(nullptr)
+    ui(new Ui::MainWindow),pingProcess(nullptr),pingLog(nullptr),pingTimer(nullptr)
 {
     ui->setupUi(this);
 
-    errorHandler = new ErrorHandler(ui->labelStatus,ui->textEditLog,this);
-    errorHandler->changeTimeout(ui->spinBoxTimeToNorm->value());
-    connect(ui->spinBoxTimeToNorm,SIGNAL(valueChanged(int)),errorHandler,SLOT(changeTimeout(int)));
+    pingLog = new PingLog(ui->labelStatus,ui->textEditLog,ui->spinBoxTimeToNorm,this);
 
     pingProcess = new QProcess(this);
     connect(pingProcess,SIGNAL(finished(int,QProcess::ExitStatus)),this,SLOT(pingFinished()));
@@ -81,7 +79,7 @@ void MainWindow::pingFinished()
             result.addWarning(PingResult::TIME_MISMATCH_WARNING);
     if (result.ping>ui->spinBoxHighPing->value())
         result.addWarning(PingResult::HIGH_PING_WARNING);
-    errorHandler->update(result);
+    pingLog->update(result);
 
 /*    if (errorString.isEmpty())
     {

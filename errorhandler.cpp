@@ -4,12 +4,13 @@
 #include <QWidget>
 #include <QLabel>
 #include <QTextEdit>
+#include <QSpinBox>
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
 #include <QtDebug>
 
 PingResult::PingResult(QString output)
-    :time(QDateTime::currentDateTime()),warnings(NO_WARNING),errors(NO_ERROR),ping(-1),output(output)
+    :time(QDateTime::currentDateTime()),warnings(NO_WARNING),errors(NO_ERROR),ping(-1),output()
 {
     if (output.isEmpty())
         addError(EMPTY_OUTPUT_ERROR);
@@ -20,10 +21,11 @@ PingResult::PingResult(QString output)
         {
             addError(NO_TIME_ERROR);
         }else {
-            ping=static_cast<int> (match.captured("time").toDouble());
+            ping=static_cast<short> (match.captured("time").toDouble());
         }
     }
-
+    if (ping<=0)
+        this->output=output;
 }
 
 bool PingResult::hasErrors() const
@@ -31,12 +33,12 @@ bool PingResult::hasErrors() const
     return warnings!=PingResult::NO_WARNING || errors!=PingResult::NO_ERROR;
 }
 
-bool PingResult::containsWarning(int warning) const
+bool PingResult::containsWarning(unsigned char warning) const
 {
     return (warning & warnings)==warning;
 }
 
-bool PingResult::containsError(int error) const
+bool PingResult::containsError(unsigned char error) const
 {
     return (error & errors)==error;
 }
@@ -96,84 +98,32 @@ bool PingResult::containsError(int errors, PingResult::Errors error)
     return (error & errors)==error;
 }
 
+PingLog::PingLog(QLabel *labelStatus, QTextEdit *textEditLog, QSpinBox *spinBoxTimeToNormal, QWidget *parent)
+    :QObject(parent),labelStatus(labelStatus),textEditLog(textEditLog),spinBoxTimeToNormal(spinBoxTimeToNormal),iCurrentID(0)
+{}
 
-Error::Error(const PingResult &result)
-    :goodPings(0)
+void PingLog::update(const PingResult &currentPing)
 {
-    start=QDateTime::currentDateTime();
-    addPing(result);
-}
-
-void Error::addPing(const PingResult &result)
-{
-    if (result.hasErrors())
-        goodPings=0;
-    else
-        ++goodPings;
-    warnings|=result.warnings;
-    errors|=result.errors;
-    pings.append(result);
-}
-
-void Error::finalize()
-{
-    end = QDateTime::currentDateTime();
-}
-
-QString Error::warningErrorString()
-{
-    return PingResult::errorString(errors) + PingResult::warningString(warnings);
-}
-
-
-ErrorHandler::ErrorHandler(QLabel *labelStatus, QTextEdit *textEditLog, QWidget *parent)
-    : QObject(parent), parentWidget(parent),labelStatus(labelStatus),textEditLog(textEditLog),timer(new QTimer(this)), currErr(nullptr)
-{
-    timer->setSingleShot(true);
-    connect(timer,SIGNAL(timeout()),this,SLOT(returnToNormal()));
-}
-
-void ErrorHandler::update(PingResult currentPing)
-{
-    if (currErr==nullptr)
-    {
-        if (!currentPing.hasErrors()){
-            labelStatus->setText(QString("Last Ping: %1 ms").arg(currentPing.ping));
-            labelStatus->setStyleSheet("QLabel {color  : rgb(0,180,0);}");
-            return;
-        }
-        errors.append(Error(currentPing));
-        currErr=&errors.last();
-    }else{
-        currErr->addPing(currentPing);
-    }
+    ++iCurrentID;
     if (currentPing.hasErrors()){
-        timer->start();
+        problemPings.insert(iCurrentID,currentPing);
+    }else{
+        cleanPings.insert(iCurrentID,currentPing.ping);
+    }
+    if (iCurrentID%100==0)
+        additionalTimeStamps.insert(iCurrentID,QDateTime::currentDateTime());
+    if (currentPing.hasErrors()){
         labelStatus->setText(QString("Problem: %1%2").arg(currentPing.ping>=0?QString("(Ping %1ms) ").arg(currentPing.ping):"").arg(currentPing.warningString()+currentPing.errorString()));
         labelStatus->setStyleSheet("QLabel {color  : rgb(180,0,0);}");
-    }else {
+    } else if (!problemPings.isEmpty() && problemPings.last().time.msecsTo(QDateTime::currentDateTime()) < spinBoxTimeToNormal->value()*1000){
         labelStatus->setText(QString("Last Ping: %1 ms (%2 pings, recovering from(%3)")
                              .arg(currentPing.ping)
-                             .arg(currErr->goodPings)
-                             .arg(currErr->warningErrorString()));
+                             .arg(iCurrentID-problemPings.lastKey())
+                             .arg(problemPings.last().warningString()+problemPings.last().errorString()));
         labelStatus->setStyleSheet("QLabel {color  : rgb(180,180,0);}");
+    }else{
+            labelStatus->setText(QString("Last Ping: %1 ms").arg(currentPing.ping));
+            labelStatus->setStyleSheet("QLabel {color  : rgb(0,180,0);}");
     }
 }
-
-void ErrorHandler::changeTimeout(int iNewTimeToNormal)
-{
-    timer->setInterval(iNewTimeToNormal*1000);
-}
-
-void ErrorHandler::returnToNormal()
-{
-    if (currErr==nullptr){
-        qDebug() << __FILE__ << __LINE__ << "unexpected call of returnToNormal()";
-        return;
-    }
-    timer->stop();
-    currErr->finalize();
-    currErr=nullptr;
-}
-
 
