@@ -13,8 +13,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow),pingProcess(nullptr),pingLog(nullptr),pingTimer(nullptr)
 {
     ui->setupUi(this);
+    ui->textEditPing->setHtml("");
+    ui->textEditLog->setHtml("");
 
-    pingLog = new PingLog(ui->labelStatus,ui->textEditLog,ui->spinBoxTimeToNorm,this);
+    pingLog = new PingLog(ui->labelStatus,ui->textEditLog,ui->textEditPing,ui->spinBoxTimeToNorm,this);
 
     pingProcess = new QProcess(this);
     connect(pingProcess,SIGNAL(finished(int,QProcess::ExitStatus)),this,SLOT(pingFinished()));
@@ -31,6 +33,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    pingProcess->blockSignals(true);
+    pingProcess->waitForFinished(2000);
     delete ui;
 }
 
@@ -45,10 +49,8 @@ void MainWindow::ping()
 
 void MainWindow::pingTakingLong()
 {
-    ui->textEditLog->append(QString("%1 %2")
-                            .arg(QString("[%1]:").arg(QDateTime::currentDateTime().toString()))
-                            .arg(QString("Ping still in progress after %1ms").arg(timePingStarted.elapsed())));
-    //TODO response time for error handler
+    ui->labelStatus->setText(QString("Ping taking long ... (>%1 ms)").arg(ui->spinBoxPingWarning->value()));
+    ui->labelStatus->setStyleSheet("QLabel {color  : rgb(180,180,0);}");
 }
 
 void MainWindow::pingStarted()
