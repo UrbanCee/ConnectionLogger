@@ -179,7 +179,29 @@ QString PingLog::visualize()
 {
     QString pingVis;
     PingEvent &event = pingEvents.last();
+    auto getVisChar = [this](int iIndex){
+        if (problemPings.contains(iIndex))
+        {
+            const PingResult &problemPing = problemPings.value(iIndex);
+            if (problemPing.errors==PingResult::NO_ERROR)
+                return "W";
+            else if (problemPing.warnings==PingResult::NO_WARNING)
+                return "E";
+            return "X";
+        }else{
+            return ".";
+        }
+    };
     int iEventLength=event.endIndex-event.startIndex+1;
+    int iLineLength=200;
+    if (iEventLength<iLineLength){
+        for (int i=0;i<iEventLength;++i)
+        {
+            pingVis.append(getVisChar(event.startIndex+i));
+        }
+    }else {
+        //TODO
+    }
     return pingVis;
 }
 
