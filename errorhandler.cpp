@@ -30,17 +30,21 @@ PingResult::PingResult(QString output)
     }
 }
 
+PingResult::PingResult(short ping)
+    :time(QDateTime::currentDateTime()),warnings(NO_WARNING),errors(NO_ERROR),ping(ping),output()
+{}
+
 bool PingResult::hasErrors() const
 {
     return warnings!=PingResult::NO_WARNING || errors!=PingResult::NO_ERROR;
 }
 
-bool PingResult::containsWarning(unsigned short warning) const
+bool PingResult::containsWarning(errorType warning) const
 {
     return (warning & warnings)==warning;
 }
 
-bool PingResult::containsError(unsigned short error) const
+bool PingResult::containsError(errorType error) const
 {
     return (error & errors)==error;
 }
@@ -60,7 +64,7 @@ QString PingResult::warningString() const
     return warningString;
 }
 
-QString PingResult::errorString(unsigned short errors)
+QString PingResult::errorString(errorType errors)
 {
     QString errorString;
     if (containsError(errors,PING_OTHER_ERROR))
@@ -76,7 +80,7 @@ QString PingResult::errorString(unsigned short errors)
     return errorString;
 }
 
-QString PingResult::warningString(unsigned short warnings)
+QString PingResult::warningString(errorType warnings)
 {
     QString warningString;
     if (containsWarning(warnings,TIME_MISMATCH_WARNING))
@@ -90,18 +94,30 @@ QString PingResult::warningString(unsigned short warnings)
     return warningString;
 }
 
-bool PingResult::containsWarning(unsigned short warnings, PingResult::Warnings warning)
+bool PingResult::containsWarning(errorType warnings, PingResult::Warnings warning)
 {
     return (warning & warnings)==warning;
 }
 
-bool PingResult::containsError(unsigned short errors, PingResult::Errors error)
+bool PingResult::containsError(errorType errors, PingResult::Errors error)
 {
     return (error & errors)==error;
 }
 
+PingResult &PingResult::operator|=(const PingResult &other)
+{
+    this->ping=-1;
+    this->errors|=other.errors;
+    this->warnings|=other.warnings;
+    this->output.append(other.output);
+    return *this;
+}
+
 
 PingEvent::PingEvent() : startIndex(-1), endIndex(-1)
+{}
+
+PingEvent::PingEvent(int start, int end) :startIndex(start),endIndex(end)
 {}
 
 
@@ -131,10 +147,11 @@ void PingLog::update(const PingResult &currentPing)
     }else{
         cleanPings.insert(iCurrentID,currentPing.ping);
         if (!problemPings.isEmpty() && problemPings.last().time.msecsTo(QDateTime::currentDateTime()) < spinBoxTimeToNormal->value()*1000){
-                labelStatus->setText(QString("Last Ping: %1 ms (%2 pings, recovering from <i>%3</i>)")
+                labelStatus->setText(QString("Last Ping: %1 ms (%2 pings, recovering from <i>%3</i>) %4")
                                      .arg(currentPing.ping)
                                      .arg(iCurrentID-problemPings.lastKey())
-                                     .arg(problemPings.last().warningString()+problemPings.last().errorString()));
+                                     .arg(problemPings.last().warningString()+problemPings.last().errorString())
+                                     .arg(visualize(40,PingEvent(pingEvents.last().startIndex,iCurrentID))));
                 labelStatus->setStyleSheet("QLabel {color  : rgb(180,180,0);}");
             }else{
                     labelStatus->setText(QString("Last Ping: %1 ms").arg(currentPing.ping));
@@ -166,7 +183,7 @@ void PingLog::update(const PingResult &currentPing)
                                             .arg(PingResult::errorString(errors))
                                             .arg(iCleanPings)
                                             .arg(iProblemPings)
-                                            .arg(visualize()));
+                                            .arg(visualize(80,event)));
                         pingEvents.append(PingEvent());
                     }
             }
@@ -175,32 +192,46 @@ void PingLog::update(const PingResult &currentPing)
         additionalTimeStamps.insert(iCurrentID,QDateTime::currentDateTime());
 }
 
-QString PingLog::visualize()
+PingResult PingLog::getPing(int id)
+{
+    if (problemPings.contains(id))
+        return problemPings.value(id);
+    else
+        return PingResult(cleanPings.value(id,-1));
+}
+
+QString PingLog::visualize(int iLineLength, const PingEvent &event)
 {
     QString pingVis;
-    PingEvent &event = pingEvents.last();
-    auto getVisChar = [this](int iIndex){
-        if (problemPings.contains(iIndex))
-        {
-            const PingResult &problemPing = problemPings.value(iIndex);
-            if (problemPing.errors==PingResult::NO_ERROR)
-                return "W";
-            else if (problemPing.warnings==PingResult::NO_WARNING)
-                return "E";
-            return "X";
-        }else{
+    auto getVisChar = [](const PingResult &pingResult){
+        if (!pingResult.hasErrors())
             return ".";
+        if (pingResult.errors==PingResult::NO_ERROR){
+            return "W";
+        }else if (pingResult.warnings==PingResult::NO_WARNING){
+            return "E";
         }
+        return "X";
     };
     int iEventLength=event.endIndex-event.startIndex+1;
-    int iLineLength=200;
     if (iEventLength<iLineLength){
         for (int i=0;i<iEventLength;++i)
         {
-            pingVis.append(getVisChar(event.startIndex+i));
+            pingVis.append(getVisChar(getPing(i+event.startIndex)));
         }
     }else {
-        //TODO
+        int iPingOffset=0;
+        for (int i=0;i<iLineLength;++i)
+        {
+            PingResult result;
+            while((iPingOffset*iLineLength)/iEventLength <= i){
+                if (iPingOffset+event.startIndex>event.endIndex)
+                    qDebug() << __FILE__ << __LINE__ << "IndexExceeded!";
+                result|=getPing(iPingOffset+event.startIndex);
+                ++iPingOffset;
+            }
+            pingVis.append(getVisChar(result));
+        }
     }
     return pingVis;
 }

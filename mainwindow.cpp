@@ -62,7 +62,7 @@ void MainWindow::pingFinished()
 {
     int iInternalPing = timePingStarted.elapsed();
     pingTimeOutWarning->stop();
-    PingResult result(pingProcess->readAll());
+    PingResult result(QString(pingProcess->readAll()));
     switch(pingProcess->exitCode())
     {
     case 0: // all ok
