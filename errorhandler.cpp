@@ -63,14 +63,14 @@ QString PingResult::warningString() const
 QString PingResult::errorString(unsigned short errors)
 {
     QString errorString;
-    if (containsError(errors,PING_RETURN_ERROR))
-        errorString.append("Ping abnormal execution! ");
+    if (containsError(errors,PING_OTHER_ERROR))
+        errorString.append("Ping other error! ");
     if (containsError(errors,PING_NO_REPLY_ERROR))
-        errorString.append("Ping return error! ");
-    if (containsError(errors,NO_TIME_ERROR))
-        errorString.append("No ping time! ");
-    if (containsError(errors,EMPTY_OUTPUT_ERROR))
+        errorString.append("Ping no reply! ");
+    else if (containsError(errors,EMPTY_OUTPUT_ERROR))
         errorString.append("Ping result empty! ");
+    else if (containsError(errors,NO_TIME_ERROR))
+        errorString.append("No ping time! ");
     if (containsError(errors,UNKNOWN_ERROR))
         errorString.append("Unknown Error! ");
     return errorString;
@@ -131,7 +131,7 @@ void PingLog::update(const PingResult &currentPing)
     }else{
         cleanPings.insert(iCurrentID,currentPing.ping);
         if (!problemPings.isEmpty() && problemPings.last().time.msecsTo(QDateTime::currentDateTime()) < spinBoxTimeToNormal->value()*1000){
-                labelStatus->setText(QString("Last Ping: %1 ms (%2 pings, recovering from(%3)")
+                labelStatus->setText(QString("Last Ping: %1 ms (%2 pings, recovering from <i>%3</i>)")
                                      .arg(currentPing.ping)
                                      .arg(iCurrentID-problemPings.lastKey())
                                      .arg(problemPings.last().warningString()+problemPings.last().errorString()));
@@ -159,19 +159,28 @@ void PingLog::update(const PingResult &currentPing)
 
                         }
                         QDateTime startTime=problemPings.value(event.startIndex).time;
-                        textEditLog->append(QString("<b>%1</b> for %2s:<br>%3 clean pings; %4 problem pings: <br>%5%6<br>")
+                        textEditLog->append(QString("<b>%1</b> for %2s: (%3%4)<br>%5 clean pings; %6 problem pings;<br>%7")
                                             .arg(startTime.toString())
                                             .arg(startTime.secsTo(currentPing.time))
+                                            .arg(PingResult::warningString(warnings))
+                                            .arg(PingResult::errorString(errors))
                                             .arg(iCleanPings)
                                             .arg(iProblemPings)
-                                            .arg(PingResult::warningString(warnings))
-                                            .arg(PingResult::errorString(errors)));
+                                            .arg(visualize()));
                         pingEvents.append(PingEvent());
                     }
             }
     }
     if (iCurrentID%100==0)
         additionalTimeStamps.insert(iCurrentID,QDateTime::currentDateTime());
+}
+
+QString PingLog::visualize()
+{
+    QString pingVis;
+    PingEvent &event = pingEvents.last();
+    int iEventLength=event.endIndex-event.startIndex+1;
+    return pingVis;
 }
 
 

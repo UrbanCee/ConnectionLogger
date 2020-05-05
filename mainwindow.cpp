@@ -71,7 +71,7 @@ void MainWindow::pingFinished()
         result.addError(PingResult::PING_NO_REPLY_ERROR);
         break;
     case 2: // error
-        result.addError(PingResult::PING_RETURN_ERROR);
+        result.addError(PingResult::PING_OTHER_ERROR);
         break;
     default:
         break;
