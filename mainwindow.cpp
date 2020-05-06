@@ -15,6 +15,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->textEditPing->setHtml("");
     ui->textEditLog->setHtml("");
+    setWindowIcon(QIcon(":/res/wifi_icon.png"));
 
     pingLog = new PingLog(ui->labelStatus,ui->textEditLog,ui->textEditPing,ui->spinBoxTimeToNorm,this);
 
