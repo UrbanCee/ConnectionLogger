@@ -59,7 +59,7 @@ QString PingResult::warningString() const
     QString warningString=PingResult::warningString(warnings);
     if (containsWarning(HIGH_PING_WARNING)){
         warningString.remove("High ping! ");
-        warningString.append(QString( "High ping! (%1 ms)").arg(ping));
+        warningString.append(QString( "High ping! (%1 ms) ").arg(ping));
     }
     return warningString;
 }
@@ -106,7 +106,7 @@ bool PingResult::containsError(errorType errors, PingResult::Errors error)
 
 PingResult &PingResult::operator|=(const PingResult &other)
 {
-    this->ping=-1;
+    this->ping=qMax(this->ping,other.ping);
     this->errors|=other.errors;
     this->warnings|=other.warnings;
     this->output.append(other.output);
@@ -159,38 +159,40 @@ void PingLog::update(const PingResult &currentPing)
                     if ( (pingEvents.last().startIndex!= -1) )
                     {
                         PingEvent &event = pingEvents.last();
-                        event.endIndex=iCurrentID;
+                        for (int i=iCurrentID;i>=event.startIndex;--i)
+                        {
+                            if (problemPings.contains(i)){
+                                event.endIndex=i;
+                                break;
+                            }
+                        }
                         int iCleanPings = 0;
-                        int iProblemPings = 0;
-                        unsigned short warnings=PingResult::NO_WARNING;
-                        unsigned short errors=PingResult::NO_ERROR;
-                        QDateTime endTime;
-                        for (int i=event.startIndex;i<=event.endIndex;i++)
+                        int iProblemPings = 1;
+                        PingResult pingResult=problemPings.value(event.startIndex);
+                        QDateTime startTime=problemPings.value(event.startIndex).time;
+                        QDateTime endTime=problemPings.value(event.endIndex).time;
+                        for (int i=event.startIndex+1;i<=event.endIndex;i++)
                         {
                             if (problemPings.contains(i)){
                                 ++iProblemPings;
-                                const PingResult &currentEvent=problemPings.value(i);
-                                warnings|=currentEvent.warnings;
-                                errors|=currentEvent.errors;
-                                endTime=currentEvent.time;
+                                pingResult|=problemPings.value(i);
                             }else {
                                 ++iCleanPings;
                             }
 
                         }
-                        QDateTime startTime=problemPings.value(event.startIndex).time;
                         if (iProblemPings==1)
                             textEditLog->append(QString("<b>%1</b>: ( %2%3)")
                                                 .arg(startTime.toString())
-                                                .arg(PingResult::warningString(warnings))
-                                                .arg(PingResult::errorString(errors))
+                                                .arg(pingResult.warningString())
+                                                .arg(pingResult.errorString())
                                                 );
                         else
                             textEditLog->append(QString("<b>%1</b> for %2: ( %3%4)<br>%5 clean pings; %6 problem pings;<br>%7")
                                             .arg(startTime.toString())
                                             .arg(sec2String(startTime.secsTo(endTime)))
-                                            .arg(PingResult::warningString(warnings))
-                                            .arg(PingResult::errorString(errors))
+                                            .arg(pingResult.warningString())
+                                            .arg(pingResult.errorString())
                                             .arg(iCleanPings)
                                             .arg(iProblemPings)
                                             .arg(visualize(80,event)));
@@ -248,7 +250,7 @@ QString PingLog::visualize(int iLineLength, const PingEvent &event)
 
 
 
-QString sec2String(int s)
+QString sec2String(qint64 s)
 {
     if (s<60)
         return QString("%1s").arg(s);

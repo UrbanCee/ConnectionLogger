@@ -13,7 +13,7 @@ QT_FORWARD_DECLARE_CLASS(QSpinBox)
 
 typedef unsigned short errorType;
 
-QString sec2String(int s);
+QString sec2String(qint64 s);
 
 struct PingResult
 {
