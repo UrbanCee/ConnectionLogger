@@ -164,21 +164,31 @@ void PingLog::update(const PingResult &currentPing)
                         int iProblemPings = 0;
                         unsigned short warnings=PingResult::NO_WARNING;
                         unsigned short errors=PingResult::NO_ERROR;
+                        QDateTime endTime;
                         for (int i=event.startIndex;i<=event.endIndex;i++)
                         {
                             if (problemPings.contains(i)){
                                 ++iProblemPings;
-                                warnings|=problemPings.value(i).warnings;
-                                errors|=problemPings.value(i).errors;
+                                const PingResult &currentEvent=problemPings.value(i);
+                                warnings|=currentEvent.warnings;
+                                errors|=currentEvent.errors;
+                                endTime=currentEvent.time;
                             }else {
                                 ++iCleanPings;
                             }
 
                         }
                         QDateTime startTime=problemPings.value(event.startIndex).time;
-                        textEditLog->append(QString("<b>%1</b> for %2s: (%3%4)<br>%5 clean pings; %6 problem pings;<br>%7")
+                        if (iProblemPings==1)
+                            textEditLog->append(QString("<b>%1</b>: ( %2%3)")
+                                                .arg(startTime.toString())
+                                                .arg(PingResult::warningString(warnings))
+                                                .arg(PingResult::errorString(errors))
+                                                );
+                        else
+                            textEditLog->append(QString("<b>%1</b> for %2s: ( %3%4)<br>%5 clean pings; %6 problem pings;<br>%7")
                                             .arg(startTime.toString())
-                                            .arg(startTime.secsTo(currentPing.time))
+                                            .arg(startTime.secsTo(endTime))
                                             .arg(PingResult::warningString(warnings))
                                             .arg(PingResult::errorString(errors))
                                             .arg(iCleanPings)
@@ -224,7 +234,7 @@ QString PingLog::visualize(int iLineLength, const PingEvent &event)
         for (int i=0;i<iLineLength;++i)
         {
             PingResult result;
-            while((iPingOffset*iLineLength)/iEventLength <= i){
+            while(iPingOffset <= event.endIndex && (iPingOffset*iLineLength)/iEventLength <= i){
                 if (iPingOffset+event.startIndex>event.endIndex)
                     qDebug() << __FILE__ << __LINE__ << "IndexExceeded!";
                 result|=getPing(iPingOffset+event.startIndex);
