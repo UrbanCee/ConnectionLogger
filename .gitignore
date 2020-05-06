@@ -1,0 +1,130 @@
+
+Skip to content
+
+    Why GitHub?
+                          
+
+
+                    
+Team
+Enterprise
+Explore
+                      
+
+                    
+Marketplace
+Pricing
+                       
+
+
+                        
+
+Sign in
+Sign up
+github /
+gitignore
+
+3.1k
+101k
+
+    53.3k
+
+Code
+Pull requests 128
+Actions
+Projects 0
+Security 0
+
+    Insights
+
+Join GitHub today
+
+GitHub is home to over 50 million developers working together to host and review code, manage projects, and build software together.
+gitignore/Qt.gitignore
+@martonmiklos martonmiklos Extend Qt.gitignore with qmlcache qrc files (#3322) ef59ea5 on Mar 12
+@martonmiklos
+@KoynovStas
+@timsueberkrueb
+@davidebeatrici
+@abrodkin
+@varhub
+@tsteinholz
+@nocnokneo
+@Ebola16
+@misterion
+@munkhoff
+@jspahrsummers
+@jakepetroules
+@fsw
+@Glordim
+54 lines (46 sloc) 624 Bytes
+# C++ objects and libs
+*.slo
+*.lo
+*.o
+*.a
+*.la
+*.lai
+*.so
+*.so.*
+*.dll
+*.dylib
+
+# Qt-es
+object_script.*.Release
+object_script.*.Debug
+*_plugin_import.cpp
+/.qmake.cache
+/.qmake.stash
+*.pro.user
+*.pro.user.*
+*.qbs.user
+*.qbs.user.*
+*.moc
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+ui_*.h
+*.qmlc
+*.jsc
+Makefile*
+*build-*
+*.qm
+*.prl
+
+# Qt unit tests
+target_wrapper.*
+
+# QtCreator
+*.autosave
+
+# QtCreator Qml
+*.qmlproject.user
+*.qmlproject.user.*
+
+# QtCreator CMake
+CMakeLists.txt.user*
+
+# QtCreator 4.8< compilation database 
+compile_commands.json
+
+# QtCreator local machine specific files for imported projects
+*creator.user*
+
+*_qmlcache.qrc
+
+    © 2020 GitHub, Inc.
+    Terms
+    Privacy
+    Security
+    Status
+    Help
+
+    Contact GitHub
+    Pricing
+    API
+    Training
+    Blog
+    About
+
+
