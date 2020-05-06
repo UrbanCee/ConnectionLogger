@@ -13,6 +13,8 @@ QT_FORWARD_DECLARE_CLASS(QSpinBox)
 
 typedef unsigned short errorType;
 
+QString sec2String(int s);
+
 struct PingResult
 {
     enum Errors{NO_ERROR = 0 , PING_OTHER_ERROR = 1<<0, PING_NO_REPLY_ERROR = 1<<1, NO_TIME_ERROR = 1<<2, EMPTY_OUTPUT_ERROR = 1 << 3, UNKNOWN_ERROR = 1<<15};

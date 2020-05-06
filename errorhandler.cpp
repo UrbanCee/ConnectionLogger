@@ -186,9 +186,9 @@ void PingLog::update(const PingResult &currentPing)
                                                 .arg(PingResult::errorString(errors))
                                                 );
                         else
-                            textEditLog->append(QString("<b>%1</b> for %2s: ( %3%4)<br>%5 clean pings; %6 problem pings;<br>%7")
+                            textEditLog->append(QString("<b>%1</b> for %2: ( %3%4)<br>%5 clean pings; %6 problem pings;<br>%7")
                                             .arg(startTime.toString())
-                                            .arg(startTime.secsTo(endTime))
+                                            .arg(sec2String(startTime.secsTo(endTime)))
                                             .arg(PingResult::warningString(warnings))
                                             .arg(PingResult::errorString(errors))
                                             .arg(iCleanPings)
@@ -247,3 +247,12 @@ QString PingLog::visualize(int iLineLength, const PingEvent &event)
 }
 
 
+
+QString sec2String(int s)
+{
+    if (s<60)
+        return QString("%1s").arg(s);
+    else if (s<3600)
+        return QString("%1m %2s").arg(s/60).arg(s%60);
+    else return QString("%1h %2m %3s").arg(s/3600).arg((s%3600)/60).arg(s%60);
+}
