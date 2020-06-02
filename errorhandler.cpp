@@ -122,8 +122,12 @@ PingEvent::PingEvent(int start, int end) :startIndex(start),endIndex(end)
 
 
 
+int PingLog::pingsUntilTimeStamps = 100;
+
+
+
 PingLog::PingLog(QLabel *labelStatus, QTextEdit *textEditLog, QTextEdit *textEditPing, QSpinBox *spinBoxTimeToNormal, QWidget *parent)
-    :QObject(parent),labelStatus(labelStatus),textEditLog(textEditLog),textEditPing(textEditPing),spinBoxTimeToNormal(spinBoxTimeToNormal),iCurrentID(0)
+    :QObject(parent),labelStatus(labelStatus),textEditLog(textEditLog),textEditPing(textEditPing),spinBoxTimeToNormal(spinBoxTimeToNormal),iCurrentID(-1)
 {
     pingEvents.append(PingEvent());
 }
@@ -200,9 +204,11 @@ void PingLog::update(const PingResult &currentPing)
                     }
             }
     }
-    if (iCurrentID%100==0)
+    if (iCurrentID%pingsUntilTimeStamps==0){
         additionalTimeStamps.insert(iCurrentID,QDateTime::currentDateTime());
+    }
 }
+
 
 PingResult PingLog::getPing(int id)
 {
@@ -211,6 +217,8 @@ PingResult PingLog::getPing(int id)
     else
         return PingResult(cleanPings.value(id,-1));
 }
+
+
 
 QString PingLog::visualize(int iLineLength, const PingEvent &event)
 {

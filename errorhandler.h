@@ -10,6 +10,7 @@ QT_FORWARD_DECLARE_CLASS(QWidget)
 QT_FORWARD_DECLARE_CLASS(QLabel)
 QT_FORWARD_DECLARE_CLASS(QTextEdit)
 QT_FORWARD_DECLARE_CLASS(QSpinBox)
+QT_FORWARD_DECLARE_CLASS(QDateTime)
 
 typedef unsigned short errorType;
 
@@ -54,6 +55,7 @@ struct PingEvent
 };
 
 
+
 class PingLog : public QObject
 {
     Q_OBJECT
@@ -74,6 +76,8 @@ private:
     QMap<int,QDateTime> additionalTimeStamps;
     QList<PingEvent> pingEvents;
     int iCurrentID;
+
+    static int pingsUntilTimeStamps;
 };
 
 #endif // ERRORHANDLER_H
