@@ -29,10 +29,13 @@ private slots:
     void ping();
     void on_comboBoxGraphTime_currentTextChanged(const QString &arg1);
     void on_spinBoxMaxPingOnGraph_valueChanged(int arg1);
+    void on_horizontalScrollBarGraph_valueChanged(int value);
+
 protected:
     void resizeEvent(QResizeEvent *event);
 private:
     void initializeChart();
+    void updateSlider();
 
     Ui::MainWindow *ui;
     QProcess *pingProcess;
@@ -44,6 +47,7 @@ private:
     QDateTimeAxis* timeAxis;
     QValueAxis *pingAxis;
     qint64 axisDurationS;
+    QDateTime timeOfFirstDataset;
 };
 
 #endif // MAINWINDOW_H

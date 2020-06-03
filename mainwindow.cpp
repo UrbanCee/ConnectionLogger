@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "errorhandler.h"
 #include "ui_mainwindow.h"
+#include "jsonhelper.h"
 
 #include <QProcess>
 #include <QTimer>
@@ -60,9 +61,10 @@ void MainWindow::initializeChart()
     ui->chartViewPing->chart()->layout()->setContentsMargins(0,0,0,0);
     ui->chartViewPing->chart()->setBackgroundRoundness(0);
 
-    ui->comboBoxGraphTime->addItems({"min","10 min","hour","day","week","month"});
-    ui->comboBoxGraphTime->setCurrentText("hour");
+    ui->comboBoxGraphTime->addItems(toStringList(graphData.value("timeComboBoxOrder")));
+    ui->comboBoxGraphTime->setCurrentText(graphData.value("startTimeSetting").toString());
 }
+
 
 
 MainWindow::~MainWindow()
@@ -121,33 +123,36 @@ void MainWindow::pingFinished()
     pingTimer->setInterval(ui->spinBoxPingDelay->value());
     pingTimer->start();
     pingLine->append(result.time.toMSecsSinceEpoch(),result.ping);
-    timeAxis->setRange(QDateTime::currentDateTime().addSecs(-axisDurationS),QDateTime::currentDateTime());
+    timeAxis->setRange(QDateTime::currentDateTime().addSecs(-axisDurationS+ui->horizontalScrollBarGraph->value()),QDateTime::currentDateTime().addSecs(ui->horizontalScrollBarGraph->value()));
     pingAxis->setRange(0,ui->spinBoxMaxPingOnGraph->value());
+    updateSlider();
+
+}
+
+void MainWindow::updateSlider()
+{
+    int iCurrentSliderVal=ui->horizontalScrollBarGraph->value();
+    ui->horizontalScrollBarGraph->blockSignals(true);
+    QDateTime startTime = QDateTime::fromMSecsSinceEpoch(pingLine->at(0).x());
+    int secondsSinceStart=startTime.secsTo(QDateTime::currentDateTime());
+    QJsonObject graphDataObj=graphTimeData.value(ui->comboBoxGraphTime->currentText()).toObject();
+    ui->horizontalScrollBarGraph->setMinimum(-qMax(secondsSinceStart-graphDataObj.value("axisDurationInS").toInt(),0));
+    ui->horizontalScrollBarGraph->setPageStep(graphDataObj.value("axisDurationInS").toInt());
+    ui->horizontalScrollBarGraph->setSingleStep(graphDataObj.value("singleStepInS").toInt());
+    ui->horizontalScrollBarGraph->setValue(iCurrentSliderVal);
+    ui->horizontalScrollBarGraph->blockSignals(false);
 }
 
 
 void MainWindow::on_comboBoxGraphTime_currentTextChanged(const QString &arg1)
 {
-    if (arg1=="min"){
-        timeAxis->setFormat("h:mm:ss");
-        axisDurationS=60;
-    }else if (arg1=="10 min"){
-        timeAxis->setFormat("h:mm:ss");
-        axisDurationS=600;
-    }else if (arg1=="hour"){
-        timeAxis->setFormat("h:mm");
-        axisDurationS=3600;
-    }else if (arg1=="day"){
-        timeAxis->setFormat("h:mm");
-        axisDurationS=3600*24;
-    }else if (arg1=="week"){
-        timeAxis->setFormat("dd.MM.");
-        axisDurationS=3600*24*7;
-    }else if (arg1=="month"){
-        timeAxis->setFormat("dd.MM.");
-        axisDurationS=3600*24*30;
-    }
+    QJsonObject graphDataObj=graphTimeData.value(arg1).toObject();
+    if (graphDataObj.isEmpty())
+            return;
+    timeAxis->setFormat(graphDataObj.value("timeFormat").toString());
+    axisDurationS=graphDataObj.value("axisDurationInS").toInt();
     timeAxis->setRange(QDateTime::currentDateTime().addSecs(-axisDurationS),QDateTime::currentDateTime());
+    updateSlider();
 }
 
 
@@ -168,4 +173,9 @@ void MainWindow::resizeEvent(QResizeEvent *event)
     else
         pingAxis->setTickCount(6);
     QMainWindow::resizeEvent(event);
+}
+
+void MainWindow::on_horizontalScrollBarGraph_valueChanged(int value)
+{
+    timeAxis->setRange(QDateTime::currentDateTime().addSecs(-axisDurationS+value),QDateTime::currentDateTime().addSecs(value));
 }

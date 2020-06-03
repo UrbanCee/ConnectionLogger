@@ -1,0 +1,38 @@
+{
+    "timeSettings": {
+        "min" : {
+            "timeFormat" : "h:mm:ss",
+            "axisDurationInS" : 60,
+            "singleStepInS" : 1
+        },
+        "10 min" : {
+            "timeFormat" : "h:mm:ss",
+            "axisDurationInS" : 600,
+            "singleStepInS" : 10
+        },
+        "hour" : {
+            "timeFormat" : "h:mm",
+            "axisDurationInS" : 3600,
+            "singleStepInS" : 60
+        },
+        "day" : {
+            "timeFormat" : "h:mm",
+            "axisDurationInS" : 86400,
+            "singleStepInS" : 1800
+        },
+        "week" : {
+            "timeFormat" : "dd.MM.",
+            "axisDurationInS" : 604800,
+            "singleStepInS" : 21600
+        },
+        "month" : {
+            "timeFormat" : "dd.MM.",
+            "axisDurationInS" : 2419200,
+            "singleStepInS" : 86400
+        }
+    },
+    "startTimeSetting" : "hour",
+    "timeComboBoxOrder" : [
+    "min","10 min","hour","day","week","month"
+    ]
+}

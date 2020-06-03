@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>res/wifi_icon.png</file>
+        <file>res/graphData.json</file>
     </qresource>
 </RCC>
