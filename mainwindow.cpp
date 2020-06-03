@@ -122,6 +122,7 @@ void MainWindow::pingFinished()
     pingTimer->start();
     pingLine->append(result.time.toMSecsSinceEpoch(),result.ping);
     timeAxis->setRange(QDateTime::currentDateTime().addSecs(-axisDurationS),QDateTime::currentDateTime());
+    pingAxis->setRange(0,ui->spinBoxMaxPingOnGraph->value());
 }
 
 
@@ -147,4 +148,24 @@ void MainWindow::on_comboBoxGraphTime_currentTextChanged(const QString &arg1)
         axisDurationS=3600*24*30;
     }
     timeAxis->setRange(QDateTime::currentDateTime().addSecs(-axisDurationS),QDateTime::currentDateTime());
+}
+
+
+void MainWindow::on_spinBoxMaxPingOnGraph_valueChanged(int arg1)
+{
+
+    pingAxis->setRange(0,arg1);
+}
+
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+    if (ui->chartViewPing->height()<100)
+        pingAxis->setTickCount(2);
+    if (ui->chartViewPing->height()<170)
+        pingAxis->setTickCount(3);
+    else if (ui->chartViewPing->height()<200)
+        pingAxis->setTickCount(5);
+    else
+        pingAxis->setTickCount(6);
+    QMainWindow::resizeEvent(event);
 }

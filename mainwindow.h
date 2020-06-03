@@ -28,7 +28,9 @@ private slots:
     void pingStarted();
     void ping();
     void on_comboBoxGraphTime_currentTextChanged(const QString &arg1);
-
+    void on_spinBoxMaxPingOnGraph_valueChanged(int arg1);
+protected:
+    void resizeEvent(QResizeEvent *event);
 private:
     void initializeChart();
 
