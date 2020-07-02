@@ -30,6 +30,7 @@ private slots:
     void on_comboBoxGraphTime_currentTextChanged(const QString &arg1);
     void on_spinBoxMaxPingOnGraph_valueChanged(int arg1);
     void on_horizontalScrollBarGraph_valueChanged(int value);
+    void updatePingAliveMarker();
 
     void on_checkBoxShowGraph_toggled(bool checked);
 
@@ -49,6 +50,7 @@ private:
     QDateTimeAxis* timeAxis;
     QValueAxis *pingAxis;
     qint64 axisDurationS;
+    QElapsedTimer *pingAlive;
     QDateTime timeOfFirstDataset;
 };
 

@@ -37,6 +37,8 @@ MainWindow::MainWindow(QWidget *parent) :
     pingTimeOutWarning->setInterval(1000);
 
     pingDurationTimer = new QElapsedTimer();
+    pingAlive = new QElapsedTimer();
+    pingAlive->start();
     ping();
 }
 
@@ -126,6 +128,7 @@ void MainWindow::pingFinished()
     timeAxis->setRange(QDateTime::currentDateTime().addSecs(-axisDurationS+ui->horizontalScrollBarGraph->value()),QDateTime::currentDateTime().addSecs(ui->horizontalScrollBarGraph->value()));
     pingAxis->setRange(0,ui->spinBoxMaxPingOnGraph->value());
     updateSlider();
+    updatePingAliveMarker();
 
 }
 
@@ -178,6 +181,14 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 void MainWindow::on_horizontalScrollBarGraph_valueChanged(int value)
 {
     timeAxis->setRange(QDateTime::currentDateTime().addSecs(-axisDurationS+value),QDateTime::currentDateTime().addSecs(value));
+}
+
+void MainWindow::updatePingAliveMarker()
+{
+    static QStringList symbol{"|","/","-","\\"};
+    static int count=0;
+    ui->labelPingAliveMarker->setText(QString("%1 (%2 ms)").arg(symbol.at(count++%symbol.size())).arg(pingAlive->elapsed()));
+    pingAlive->restart();
 }
 
 void MainWindow::on_checkBoxShowGraph_toggled(bool checked)
