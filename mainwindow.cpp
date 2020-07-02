@@ -131,7 +131,7 @@ void MainWindow::pingFinished()
 
 void MainWindow::updateSlider()
 {
-    int iCurrentSliderVal=ui->horizontalScrollBarGraph->value();
+   int iCurrentSliderVal=ui->horizontalScrollBarGraph->value();
     ui->horizontalScrollBarGraph->blockSignals(true);
     QDateTime startTime = QDateTime::fromMSecsSinceEpoch(pingLine->at(0).x());
     int secondsSinceStart=startTime.secsTo(QDateTime::currentDateTime());
@@ -178,4 +178,10 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 void MainWindow::on_horizontalScrollBarGraph_valueChanged(int value)
 {
     timeAxis->setRange(QDateTime::currentDateTime().addSecs(-axisDurationS+value),QDateTime::currentDateTime().addSecs(value));
+}
+
+void MainWindow::on_checkBoxShowGraph_toggled(bool checked)
+{
+    ui->chartViewPing->setVisible(checked);
+    ui->chartViewPing->setEnabled(checked);
 }

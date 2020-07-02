@@ -49,76 +49,10 @@
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
           <layout class="QGridLayout" name="gridLayout">
-           <item row="3" column="2">
-            <widget class="QLabel" name="labelMs_4">
-             <property name="text">
-              <string>%</string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="0">
-            <spacer name="verticalSpacer">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>40</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="labelSettings_2">
-             <property name="text">
-              <string>Warning:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="0">
-            <widget class="QLabel" name="labelSettings_5">
-             <property name="text">
-              <string>Graph Time</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QSpinBox" name="spinBoxPingDelay">
-             <property name="minimum">
-              <number>100</number>
-             </property>
-             <property name="maximum">
-              <number>20000</number>
-             </property>
-             <property name="singleStep">
-              <number>100</number>
-             </property>
-             <property name="value">
-              <number>500</number>
-             </property>
-            </widget>
-           </item>
            <item row="2" column="0">
             <widget class="QLabel" name="labelSettings_3">
              <property name="text">
               <string>High Ping:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QSpinBox" name="spinBoxPingWarning">
-             <property name="minimum">
-              <number>100</number>
-             </property>
-             <property name="maximum">
-              <number>30000</number>
-             </property>
-             <property name="singleStep">
-              <number>100</number>
-             </property>
-             <property name="value">
-              <number>1000</number>
              </property>
             </widget>
            </item>
@@ -132,39 +66,6 @@
              </property>
              <property name="value">
               <number>300</number>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="0">
-            <widget class="QLabel" name="labelSettings1">
-             <property name="text">
-              <string>Ping delay: </string>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="1">
-            <widget class="QComboBox" name="comboBoxGraphTime"/>
-           </item>
-           <item row="2" column="1">
-            <widget class="QSpinBox" name="spinBoxHighPing">
-             <property name="minimum">
-              <number>50</number>
-             </property>
-             <property name="maximum">
-              <number>1000</number>
-             </property>
-             <property name="singleStep">
-              <number>50</number>
-             </property>
-             <property name="value">
-              <number>300</number>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="2">
-            <widget class="QLabel" name="labelMs_3">
-             <property name="text">
-              <string>ms</string>
              </property>
             </widget>
            </item>
@@ -184,17 +85,33 @@
              </property>
             </widget>
            </item>
-           <item row="4" column="2">
-            <widget class="QLabel" name="labelMs_5">
+           <item row="5" column="0">
+            <spacer name="verticalSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="7" column="1">
+            <widget class="QComboBox" name="comboBoxGraphTime"/>
+           </item>
+           <item row="3" column="2">
+            <widget class="QLabel" name="labelMs_4">
              <property name="text">
-              <string>s</string>
+              <string>%</string>
              </property>
             </widget>
            </item>
-           <item row="4" column="0">
-            <widget class="QLabel" name="labelSettings_4">
+           <item row="8" column="0">
+            <widget class="QLabel" name="labelSettings_6">
              <property name="text">
-              <string>TimeToNorm</string>
+              <string>Max Ping</string>
              </property>
             </widget>
            </item>
@@ -205,10 +122,63 @@
              </property>
             </widget>
            </item>
-           <item row="1" column="2">
-            <widget class="QLabel" name="labelMs_2">
+           <item row="1" column="1">
+            <widget class="QSpinBox" name="spinBoxPingWarning">
+             <property name="minimum">
+              <number>100</number>
+             </property>
+             <property name="maximum">
+              <number>30000</number>
+             </property>
+             <property name="singleStep">
+              <number>100</number>
+             </property>
+             <property name="value">
+              <number>1000</number>
+             </property>
+            </widget>
+           </item>
+           <item row="8" column="1">
+            <widget class="QSpinBox" name="spinBoxMaxPingOnGraph">
+             <property name="minimum">
+              <number>20</number>
+             </property>
+             <property name="maximum">
+              <number>1000</number>
+             </property>
+             <property name="singleStep">
+              <number>20</number>
+             </property>
+             <property name="value">
+              <number>100</number>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="labelSettings_2">
              <property name="text">
-              <string>ms</string>
+              <string>Warning:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="2">
+            <widget class="QLabel" name="labelMs_5">
+             <property name="text">
+              <string>s</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="labelSettings1">
+             <property name="text">
+              <string>Ping delay: </string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLabel" name="labelSettings_4">
+             <property name="text">
+              <string>TimeToNorm</string>
              </property>
             </widget>
            </item>
@@ -222,26 +192,73 @@
              </property>
             </widget>
            </item>
-           <item row="7" column="0">
-            <widget class="QLabel" name="labelSettings_6">
-             <property name="text">
-              <string>Max Ping</string>
-             </property>
-            </widget>
-           </item>
-           <item row="7" column="1">
-            <widget class="QSpinBox" name="spinBoxMaxPingOnGraph">
+           <item row="2" column="1">
+            <widget class="QSpinBox" name="spinBoxHighPing">
              <property name="minimum">
-              <number>20</number>
+              <number>50</number>
              </property>
              <property name="maximum">
               <number>1000</number>
              </property>
              <property name="singleStep">
-              <number>20</number>
+              <number>50</number>
              </property>
              <property name="value">
+              <number>300</number>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="0">
+            <widget class="QLabel" name="labelSettings_5">
+             <property name="text">
+              <string>Graph Time</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="2">
+            <widget class="QLabel" name="labelMs_3">
+             <property name="text">
+              <string>ms</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QSpinBox" name="spinBoxPingDelay">
+             <property name="minimum">
               <number>100</number>
+             </property>
+             <property name="maximum">
+              <number>20000</number>
+             </property>
+             <property name="singleStep">
+              <number>100</number>
+             </property>
+             <property name="value">
+              <number>500</number>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <widget class="QLabel" name="labelMs_2">
+             <property name="text">
+              <string>ms</string>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="0">
+            <widget class="QLabel" name="labelSettings_7">
+             <property name="text">
+              <string>Graph</string>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="1">
+            <widget class="QCheckBox" name="checkBoxShowGraph">
+             <property name="text">
+              <string/>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
              </property>
             </widget>
            </item>

@@ -31,6 +31,8 @@ private slots:
     void on_spinBoxMaxPingOnGraph_valueChanged(int arg1);
     void on_horizontalScrollBarGraph_valueChanged(int value);
 
+    void on_checkBoxShowGraph_toggled(bool checked);
+
 protected:
     void resizeEvent(QResizeEvent *event);
 private:
