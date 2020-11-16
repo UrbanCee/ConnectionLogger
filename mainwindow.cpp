@@ -124,7 +124,7 @@ void MainWindow::pingFinished()
 
     pingTimer->setInterval(ui->spinBoxPingDelay->value());
     pingTimer->start();
-    pingLine->append(result.time.toMSecsSinceEpoch(),result.ping);
+    if (ui->checkBoxShowGraph->isChecked()) pingLine->append(result.time.toMSecsSinceEpoch(),result.ping);
     timeAxis->setRange(QDateTime::currentDateTime().addSecs(-axisDurationS+ui->horizontalScrollBarGraph->value()),QDateTime::currentDateTime().addSecs(ui->horizontalScrollBarGraph->value()));
     pingAxis->setRange(0,ui->spinBoxMaxPingOnGraph->value());
     updateSlider();
